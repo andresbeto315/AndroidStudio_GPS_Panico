@@ -22,14 +22,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         FirebaseApp.initializeApp(this);
-
-    }
-
-    protected void onStart()
-    {
-        super.onStart();
-        InitFirebase();
-
     }
 
     private void InitFirebase() {
@@ -53,5 +45,12 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(getApplication(),
                 "Guardado",
                 Toast.LENGTH_LONG).show();
+    }
+
+    protected void onStart()
+    {
+        super.onStart();
+        InitFirebase();
+
     }
 }

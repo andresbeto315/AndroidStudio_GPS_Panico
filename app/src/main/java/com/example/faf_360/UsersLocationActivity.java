@@ -80,7 +80,9 @@ public class UsersLocationActivity extends FragmentActivity implements
     }
 
     private void AddMarkerPositionUsers() {
-        List<UserInfoLocation> users = new Firebase().GetUsers();
+        Firebase firebase = new Firebase(this);
+        List<UserInfoLocation> users = firebase.GetUsersOld();
+        firebase.GetUsers();
         for (UserInfoLocation user : users) {
             mMap.addMarker(new MarkerOptions().position(user.Location).title(user.UserName));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(user.Location, 15));
