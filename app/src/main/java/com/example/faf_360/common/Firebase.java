@@ -1,7 +1,6 @@
 package com.example.faf_360.common;
 
 import android.app.Activity;
-import android.location.Location;
 
 import com.example.faf_360.models.UserInfoLocation;
 import com.example.faf_360.models.Usuarios;
@@ -16,7 +15,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class Firebase {
 
@@ -40,7 +38,7 @@ public class Firebase {
         List<Usuarios> users = new ArrayList<Usuarios>();
         //DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Prueba");
         DatabaseReference ref = databaseReference.child("Prueba");
-        
+
 
         ref.addListenerForSingleValueEvent(
                 new ValueEventListener() {
@@ -107,5 +105,3 @@ public class Firebase {
         return users;
     }
 }
-
-

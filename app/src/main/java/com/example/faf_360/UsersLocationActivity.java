@@ -8,17 +8,25 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.example.faf_360.common.Firebase;
 import com.example.faf_360.common.Permission;
-import com.example.faf_360.models.UserInfoLocation;
+import com.example.faf_360.models.Usuarios;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class UsersLocationActivity extends FragmentActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
@@ -30,10 +38,20 @@ public class UsersLocationActivity extends FragmentActivity implements
     private GoogleMap mMap;
     private Location currentLocation;
 
+    private FirebaseDatabase firebaseDatabase;
+    private DatabaseReference databaseReference;
+
+    private List<Usuarios> Users;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_users_location);
+
+        this.Users = new ArrayList<Usuarios>();
+
+        FirebaseApp.initializeApp(this);
+        InitFirebase();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.onCreate(savedInstanceState);
@@ -41,29 +59,47 @@ public class UsersLocationActivity extends FragmentActivity implements
         mapFragment.onResume();
     }
 
+    private void InitFirebase() {
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference();
+
+        // Prueba nombre de la tabla conel que se guardaron los usuarios
+        DatabaseReference ref = databaseReference.child("Prueba");
+
+        ref.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        collectUsers((Map<String, Object>) dataSnapshot.getValue());
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        //handle databaseError
+                    }
+                }
+        );
+    }
+
+    private void collectUsers(Map<String,Object> users) {
+        for (Map.Entry<String, Object> entry : users.entrySet()) {
+            Map singleUser = (Map) entry.getValue();
+            Usuarios user = Usuarios.toUser(singleUser);
+            this.Users.add(user);
+        }
+        AddMarkerPositionUsers();
+    }
+
     public void SavePosition() {
 
     }
 
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
         mMap.setOnMarkerClickListener(this);
-
-        AddMarkerPositionUsers();
-
         enableMyLocation();
 
         //mMap.setOnMyLocationChangeListener(this);
@@ -80,12 +116,16 @@ public class UsersLocationActivity extends FragmentActivity implements
     }
 
     private void AddMarkerPositionUsers() {
-        Firebase firebase = new Firebase(this);
-        List<UserInfoLocation> users = firebase.GetUsersOld();
-        firebase.GetUsers();
-        for (UserInfoLocation user : users) {
-            mMap.addMarker(new MarkerOptions().position(user.Location).title(user.UserName));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(user.Location, 15));
+        for (Usuarios user : this.Users) {
+            if (!user.getIsConnected()) {
+                mMap.addMarker(new MarkerOptions()
+                        .position(user.getLocation())
+                        .title(user.toString())
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+            } else {
+                mMap.addMarker(new MarkerOptions().position(user.getLocation()).title(user.toString()));
+            }
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(user.getLocation(), 15));
         }
     }
 
