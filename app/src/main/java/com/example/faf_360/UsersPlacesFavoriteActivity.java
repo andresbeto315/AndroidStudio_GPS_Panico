@@ -1,9 +1,13 @@
 package com.example.faf_360;
 
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import com.example.faf_360.models.UserInfoLocation;
+import android.view.View;
+import android.widget.Toast;
+
+import com.example.faf_360.models.App;
+import com.example.faf_360.models.Usuarios;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -11,12 +15,25 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class UsersPlacesFavoriteActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private MapView mapView;
-    private UserInfoLocation user;
+    private List<LatLng> Favorites;
+
+    private FirebaseDatabase firebaseDatabase;
+    private DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,14 +44,52 @@ public class UsersPlacesFavoriteActivity extends FragmentActivity implements OnM
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        user = new UserInfoLocation();
-        user.UserName = "Johanna";
-        user.Favorites.add(new LatLng(4.668078, -74.0571497));
-        user.Favorites.add(new LatLng(4.6458605, -74.0795658));
-        user.Favorites.add(new LatLng(4.6494,-74.0794506));
-        user.Favorites.add(new LatLng(4.6419359,-74.0790751));
+        Intent intent = getIntent();
+        String id = intent.getStringExtra("userId");
+        Toast.makeText(this, id, Toast.LENGTH_SHORT).show();
+
+        Favorites = new ArrayList<LatLng>();
+
+        FirebaseApp.initializeApp(this);
+        InitFirebase();
+
+        // Se crea el usuario autenticado
+        DatabaseReference ref = databaseReference.child("FavoritePlaces").child(id);
+        ref.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        collectLocations((Map<String, Object>) dataSnapshot.getValue());
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        //handle databaseError
+                    }
+                }
+        );
     }
 
+    public void Volver(View view)
+    {
+        Intent intent = new Intent(UsersPlacesFavoriteActivity.this, UsersLocationActivity.class);
+        UsersPlacesFavoriteActivity.this.startActivity(intent);
+    }
+
+    private void collectLocations(Map<String,Object> users) {
+        if (users != null) {
+            for (Map.Entry<String, Object> entry : users.entrySet()) {
+                Map mapFavorite = (Map) entry.getValue();
+                this.Favorites.add(new LatLng((double) mapFavorite.get("latitude"), (double) mapFavorite.get("longitude")));
+            }
+        }
+        AddMarkers();
+    }
+
+    private void InitFirebase() {
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference();
+    }
 
     /**
      * Manipulates the map once available.
@@ -48,25 +103,14 @@ public class UsersPlacesFavoriteActivity extends FragmentActivity implements OnM
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        AddMarkers();
-        /*
-        mMap = googleMap;
+        mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
     }
 
-
-    private void AddMarkers(){
-        String myLat="prueba";
-
-        for (LatLng posision : user.Favorites)
-        {
+    private void AddMarkers() {
+        for (LatLng posision : Favorites) {
             mMap.addMarker(new MarkerOptions().position(posision).title("Su Lugar Favorito"));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(posision, 15));
         }
-
     }
 }

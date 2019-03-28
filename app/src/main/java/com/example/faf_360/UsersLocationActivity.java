@@ -1,20 +1,25 @@
 package com.example.faf_360;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.faf_360.common.Permission;
+import com.example.faf_360.models.App;
 import com.example.faf_360.models.Usuarios;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.FirebaseApp;
@@ -27,6 +32,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class UsersLocationActivity extends FragmentActivity implements
         GoogleMap.OnMyLocationButtonClickListener,
@@ -36,7 +42,6 @@ public class UsersLocationActivity extends FragmentActivity implements
         GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
-    private Location currentLocation;
 
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseReference;
@@ -52,6 +57,24 @@ public class UsersLocationActivity extends FragmentActivity implements
 
         FirebaseApp.initializeApp(this);
         InitFirebase();
+
+        // Se crea el usuario autenticado
+        DatabaseReference ref = databaseReference.child("Prueba").child("02bfc2d4-c894-4572-882e-0c4a0359ef20");
+        ref.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Map singleUser = (Map) dataSnapshot.getValue();
+                        Usuarios user = Usuarios.toUser(singleUser);
+                        App.GetApp().setUserLogin(user);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        //handle databaseError
+                    }
+                }
+        );
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.onCreate(savedInstanceState);
@@ -90,8 +113,11 @@ public class UsersLocationActivity extends FragmentActivity implements
         AddMarkerPositionUsers();
     }
 
-    public void SavePosition() {
-
+    public void SavePosition(View view) {
+        CameraPosition cp = mMap.getCameraPosition();
+        LatLng favorite = new LatLng(cp.target.latitude, cp.target.longitude);
+        databaseReference.child("FavoritePlaces").child(App.GetApp().getUserLogin().getId()).child(UUID.randomUUID().toString()).setValue(favorite);
+        Toast.makeText(this, "Un nuevo favorito ha sido guardado.", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -100,9 +126,18 @@ public class UsersLocationActivity extends FragmentActivity implements
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
         mMap.setOnMarkerClickListener(this);
-        enableMyLocation();
+        mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        //mMap.setOnMyLocationChangeListener(this);
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Intent intent = new Intent(UsersLocationActivity.this, UsersPlacesFavoriteActivity.class);
+                intent.putExtra("userId", marker.getSnippet());
+                UsersLocationActivity.this.startActivity(intent);
+            }
+        });
+
+        enableMyLocation();
     }
 
     @SuppressLint("MissingPermission")
@@ -119,11 +154,15 @@ public class UsersLocationActivity extends FragmentActivity implements
         for (Usuarios user : this.Users) {
             if (!user.getIsConnected()) {
                 mMap.addMarker(new MarkerOptions()
+                        .snippet(user.getId())
                         .position(user.getLocation())
                         .title(user.toString())
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
             } else {
-                mMap.addMarker(new MarkerOptions().position(user.getLocation()).title(user.toString()));
+                mMap.addMarker(new MarkerOptions()
+                        .snippet(user.getId())
+                        .position(user.getLocation())
+                        .title(user.toString()));
             }
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(user.getLocation(), 15));
         }
