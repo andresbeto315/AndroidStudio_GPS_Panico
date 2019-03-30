@@ -105,7 +105,8 @@ public class Usuarios {
         user.setPassword(userMap.get("password").toString());
         user.setIsConnected((boolean)userMap.get("isConnected"));
         Map location = (Map)userMap.get("location");
-        user.setLocation(new LatLng((double)location.get("latitude"), (double)location.get("longitude")));
+        if (location != null)
+            user.setLocation(new LatLng((double)location.get("latitude"), (double)location.get("longitude")));
         return user;
     }
 

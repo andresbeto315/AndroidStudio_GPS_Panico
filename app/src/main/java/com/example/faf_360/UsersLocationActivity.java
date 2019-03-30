@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -39,7 +40,8 @@ public class UsersLocationActivity extends FragmentActivity implements
         GoogleMap.OnMyLocationClickListener,
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback,
-        GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnMyLocationChangeListener{
 
     private GoogleMap mMap;
 
@@ -57,39 +59,42 @@ public class UsersLocationActivity extends FragmentActivity implements
 
         FirebaseApp.initializeApp(this);
         InitFirebase();
-
-        // Se crea el usuario autenticado
-        DatabaseReference ref = databaseReference.child("Prueba").child("02bfc2d4-c894-4572-882e-0c4a0359ef20");
-        ref.addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        Map singleUser = (Map) dataSnapshot.getValue();
-                        Usuarios user = Usuarios.toUser(singleUser);
-                        App.GetApp().setUserLogin(user);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        //handle databaseError
-                    }
-                }
-        );
+        App.GetApp(this);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.onCreate(savedInstanceState);
         mapFragment.getMapAsync(this);
         mapFragment.onResume();
     }
+/*
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (App.GetApp(this).getUserLogin() != null)
+            databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(true);
+    }
+*/
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (App.GetApp(this).getUserLogin() != null)
+            databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (App.GetApp(this).getUserLogin() != null)
+            databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(true);
+    }
 
     private void InitFirebase() {
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
 
-        // Prueba nombre de la tabla conel que se guardaron los usuarios
-        DatabaseReference ref = databaseReference.child("Prueba");
-
-        ref.addListenerForSingleValueEvent(
+        DatabaseReference ref = databaseReference.child("Usuario");
+        //ref.addListenerForSingleValueEvent(
+        ref.addValueEventListener(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -105,6 +110,7 @@ public class UsersLocationActivity extends FragmentActivity implements
     }
 
     private void collectUsers(Map<String,Object> users) {
+        this.Users.clear();
         for (Map.Entry<String, Object> entry : users.entrySet()) {
             Map singleUser = (Map) entry.getValue();
             Usuarios user = Usuarios.toUser(singleUser);
@@ -116,7 +122,7 @@ public class UsersLocationActivity extends FragmentActivity implements
     public void SavePosition(View view) {
         CameraPosition cp = mMap.getCameraPosition();
         LatLng favorite = new LatLng(cp.target.latitude, cp.target.longitude);
-        databaseReference.child("FavoritePlaces").child(App.GetApp().getUserLogin().getId()).child(UUID.randomUUID().toString()).setValue(favorite);
+        databaseReference.child("FavoritePlaces").child(App.GetApp(this).getUserLogin().getId()).child(UUID.randomUUID().toString()).setValue(favorite);
         Toast.makeText(this, "Un nuevo favorito ha sido guardado.", Toast.LENGTH_SHORT).show();
     }
 
@@ -127,6 +133,7 @@ public class UsersLocationActivity extends FragmentActivity implements
         mMap.setOnMyLocationClickListener(this);
         mMap.setOnMarkerClickListener(this);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.setOnMyLocationChangeListener(this);
 
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
@@ -151,20 +158,23 @@ public class UsersLocationActivity extends FragmentActivity implements
     }
 
     private void AddMarkerPositionUsers() {
+        mMap.clear();
         for (Usuarios user : this.Users) {
-            if (!user.getIsConnected()) {
-                mMap.addMarker(new MarkerOptions()
-                        .snippet(user.getId())
-                        .position(user.getLocation())
-                        .title(user.toString())
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-            } else {
-                mMap.addMarker(new MarkerOptions()
-                        .snippet(user.getId())
-                        .position(user.getLocation())
-                        .title(user.toString()));
+            if (user.getLocation() != null) {
+                if (!user.getIsConnected()) {
+                    mMap.addMarker(new MarkerOptions()
+                            .snippet(user.getId())
+                            .position(user.getLocation())
+                            .title(user.toString())
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                } else {
+                    mMap.addMarker(new MarkerOptions()
+                            .snippet(user.getId())
+                            .position(user.getLocation())
+                            .title(user.toString()));
+                }
+                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(user.getLocation(), 15));
             }
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(user.getLocation(), 15));
         }
     }
 
@@ -187,5 +197,14 @@ public class UsersLocationActivity extends FragmentActivity implements
                 Toast.LENGTH_SHORT).show();
 
         return false;
+    }
+
+    @Override
+    public void onMyLocationChange(Location location) {
+        if (location != null) {
+            LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+            if (App.GetApp(this).getUserLogin() != null)
+                databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("location").setValue(position);
+        }
     }
 }
