@@ -3,7 +3,20 @@
     <string name="btn_guardar">Prueba guardar datos</string>
     <string name="title_activity_users_location">Favoritos</string>
 
+    <string name="register_name_firstname">Nombre(s)</string>
+    <string name="register_name_lastname">Apellido(s)</string>
+    <string name="register_email">Correo</string>
+    <string name="register_password">Contraseña</string>
+    <string name="register_confirm_welcome">¡Bienvenido!</string>
+    <string name="register_confirm_meesage">Tu perfil fue creado exitosamente.</string>
+    <string name="register_confirm_button">Regresar</string>
     <string name="validate_required">Debe ser diligenciado.</string>
+    <string name="login_confirm">¡Ingreso exitoso!</string>
+    <string name="login_error_email">El Correo electrónico ingresado no está registrado.</string>
+    <string name="login_error_password">La contraseña no es válida.</string>
+    <string name="login_message_close">Sesión cerrada correctamente.</string>
+
+    <string name="action_continue">Continuar</string>
 
     <string name="desc_sisaber_lockup">F&amp;F 360°</string>
     <string name="emailpassword_title_text">F&amp;F 360°</string>

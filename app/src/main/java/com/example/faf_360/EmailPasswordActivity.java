@@ -79,9 +79,8 @@ public class EmailPasswordActivity extends BaseActivity implements
     }
 
     private void createAccount(String email, String password) {
-//        Intent intent = new Intent(getApplicationContext(), RegisterAgeActivity.class);
-//        startActivity(intent);
-//        overridePendingTransition(R.anim.fromrightin, R.anim.fromleftout);
+        Intent intent = new Intent(getApplicationContext(), RegisterNameActivity.class);
+        startActivity(intent);
     }
 
     private void signIn(String email, String password) {
