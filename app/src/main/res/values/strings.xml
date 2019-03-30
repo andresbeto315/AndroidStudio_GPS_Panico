@@ -15,7 +15,7 @@
     <string name="login_error_email">El Correo electrónico ingresado no está registrado.</string>
     <string name="login_error_password">La contraseña no es válida.</string>
     <string name="login_message_close">Sesión cerrada correctamente.</string>
-    <string name="btn_create_profile">Crear Perfil</string>
+    <string name="btn_create_profile">Guardar</string>
     <string name="error_database">No se pudo obtener conexión a la bases de datos, inténtelo más tarde.</string>
 
     <string name="action_continue">Continuar</string>

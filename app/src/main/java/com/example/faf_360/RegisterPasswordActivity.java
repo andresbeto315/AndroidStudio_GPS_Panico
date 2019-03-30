@@ -136,9 +136,7 @@ public class RegisterPasswordActivity extends BaseActivity implements View.OnCli
         hideProgressDialog();
         if (user != null) {
             if (!user.isEmailVerified()) {
-                Intent intent = new Intent(getApplicationContext(), EmailPasswordActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
+
             }
         }
     }
