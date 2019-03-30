@@ -5,8 +5,8 @@
 
     <string name="validate_required">Debe ser diligenciado.</string>
 
-    <string name="desc_sisaber_lockup">siSaber logo</string>
-    <string name="emailpassword_title_text">siSaber</string>
+    <string name="desc_sisaber_lockup">F&amp;F 360°</string>
+    <string name="emailpassword_title_text">F&amp;F 360°</string>
     <string name="signed_out">Sesión no iniciada</string>
     <string name="hint_email">Correo electrónico</string>
     <string name="hint_password">Contraseña</string>
