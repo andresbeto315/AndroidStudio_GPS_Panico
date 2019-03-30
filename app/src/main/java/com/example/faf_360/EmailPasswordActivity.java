@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.faf_360.common.Firebase;
+import com.example.faf_360.models.App;
 import com.example.faf_360.utils.spUsuarios;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -79,6 +80,20 @@ public class EmailPasswordActivity extends BaseActivity implements
                     getString(R.string.error_database),
                     Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (App.GetApp(this).getUserLogin() != null)
+            dbrSisaber.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (App.GetApp(this).getUserLogin() != null)
+            dbrSisaber.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(true);
     }
 
     @Override
