@@ -2,4 +2,25 @@
     <string name="app_name">Family and friends 360</string>
     <string name="btn_guardar">Prueba guardar datos</string>
     <string name="title_activity_users_location">Favoritos</string>
+
+    <string name="validate_required">Debe ser diligenciado.</string>
+
+    <string name="desc_sisaber_lockup">siSaber logo</string>
+    <string name="emailpassword_title_text">siSaber</string>
+    <string name="signed_out">Sesión no iniciada</string>
+    <string name="hint_email">Correo electrónico</string>
+    <string name="hint_password">Contraseña</string>
+    <string name="sign_in">Ingresar</string>
+    <string name="create_account">Crear Cuenta</string>
+    <string name="sign_out">Cerrar sesión</string>
+    <string name="verify_email">Verificar Correo</string>
+    <string name="emailpassword_status_fmt">Correo registrado: %1$s \n(Verificado: %2$s)</string>
+    <string name="firebase_status_fmt">Código: %s</string>
+    <string name="auth_failed">Hubo un error: </string>
+    <string name="loading">Un momento por favor …</string>
+    <string name="label_emailpassword">Email/Password Authentication</string>
+    <string name="validate_email_error">El correo electrónico no es correcto.</string>
+    <string name="validate_password_error">La contraseña es demasiado corta.</string>
+    <string name="send_verification_email">Se envió un correo de verificación a: </string>
+
 </resources>
