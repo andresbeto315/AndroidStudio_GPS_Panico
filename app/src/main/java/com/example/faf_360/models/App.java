@@ -39,23 +39,26 @@ public class App {
             mAuth = FirebaseAuth.getInstance();
 
             FirebaseUser currentUser = mAuth.getCurrentUser();
-            // Se crea el usuario autenticado
-            DatabaseReference ref = dbrSisaber.child("Usuario").child(currentUser.getUid());
-            ref.addListenerForSingleValueEvent(
-                    new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            Map singleUser = (Map) dataSnapshot.getValue();
-                            Usuarios user = Usuarios.toUser(singleUser);
-                            app.setUserLogin(user);
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                            //handle databaseError
+            if (currentUser != null) {
+                // Se crea el usuario autenticado
+                DatabaseReference ref = dbrSisaber.child("Usuario").child(currentUser.getUid());
+                ref.addListenerForSingleValueEvent(
+                        new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                Map singleUser = (Map) dataSnapshot.getValue();
+                                Usuarios user = Usuarios.toUser(singleUser);
+                                app.setUserLogin(user);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                //handle databaseError
+                            }
                         }
-                    }
-            );
+                );
+            }
         }
         return app;
     }
