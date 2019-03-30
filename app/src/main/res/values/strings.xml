@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Family and friends 360</string>
+    <string name="app_name">Family and Friends 360°</string>
     <string name="btn_guardar">Prueba guardar datos</string>
     <string name="title_activity_users_location">Favoritos</string>
 
