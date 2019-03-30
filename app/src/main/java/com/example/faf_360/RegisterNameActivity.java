@@ -1,5 +1,6 @@
 package com.example.faf_360;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -35,9 +36,8 @@ public class RegisterNameActivity extends AppCompatActivity {
             spUsuarios.saveFirstName(etRegisterNameFirstName.getText().toString());
             spUsuarios.saveLastName(etRegisterNameLastName.getText().toString());
 
-//            Intent intent = new Intent(this, RegisterEmailActivity.class);
-//            startActivity(intent);
-//            overridePendingTransition(R.anim.fromrightin, R.anim.fromleftout);
+            Intent intent = new Intent(this, RegisterEmailActivity.class);
+            startActivity(intent);
         }
     }
 }
