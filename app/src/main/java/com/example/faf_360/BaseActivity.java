@@ -26,20 +26,6 @@ public class BaseActivity extends AppCompatActivity {
         InitFirebase();
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (App.GetApp(this).getUserLogin() != null)
-            databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(false);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (App.GetApp(this).getUserLogin() != null)
-            databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(true);
-    }
-
     public void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
@@ -72,7 +58,5 @@ public class BaseActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
         hideProgressDialog();
-        if (App.GetApp(this).getUserLogin() != null)
-            databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(false);
     }
 }
