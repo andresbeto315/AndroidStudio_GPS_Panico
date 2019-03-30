@@ -28,9 +28,8 @@ public class RegisterEmailActivity extends AppCompatActivity {
         } else {
             spUsuarios.saveEmail(etRegisterEmail.getText().toString());
 
-            //Intent intent = new Intent(this, RegisterPasswordActivity.class);
-            //startActivity(intent);
-            //overridePendingTransition(R.anim.fromrightin, R.anim.fromleftout);
+            Intent intent = new Intent(this, RegisterPasswordActivity.class);
+            startActivity(intent);
         }
     }
 }

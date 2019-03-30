@@ -48,6 +48,8 @@
         </activity>
         <activity android:name=".RegisterEmailActivity">
         </activity>
+        <activity android:name=".RegisterPasswordActivity">
+        </activity>
     </application>
 
 </manifest>
