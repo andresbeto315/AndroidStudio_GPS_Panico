@@ -10,12 +10,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.faf_360.common.Firebase;
 import com.example.faf_360.utils.spUsuarios;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +35,8 @@ public class EmailPasswordActivity extends BaseActivity implements
     private EditText mPasswordField;
 
     private FirebaseAuth mAuth;
+    private FirebaseDatabase fdbSisaber;
+    private DatabaseReference dbrSisaber;
 
     spUsuarios spUsuarios = new spUsuarios(this);
 
@@ -53,6 +59,26 @@ public class EmailPasswordActivity extends BaseActivity implements
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+
+        InitFirebase();
+    }
+
+    private void InitFirebase() {
+        try {
+            FirebaseApp.initializeApp(this);
+
+            //Initialize Firebase Db
+            fdbSisaber = FirebaseDatabase.getInstance();
+            dbrSisaber = fdbSisaber.getReference();
+
+            // Initialize Firebase Auth
+            mAuth = FirebaseAuth.getInstance();
+        } catch (Exception e)
+        {
+            Toast.makeText(getApplication(),
+                    getString(R.string.error_database),
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -83,6 +109,15 @@ public class EmailPasswordActivity extends BaseActivity implements
         startActivity(intent);
     }
 
+    private void goHome()
+    {
+        spUsuarios.saveIsConnected(true);
+        FirebaseUser user = mAuth.getCurrentUser();
+        dbrSisaber.child("Usuario").child(user.getUid()).child("isConnected").setValue(true);
+        Intent intent = new Intent(EmailPasswordActivity.this, UsersLocationActivity.class);
+        EmailPasswordActivity.this.startActivity(intent);
+    }
+
     private void signIn(String email, String password) {
         Log.d(TAG, "signIn:" + email);
         if (!validateForm()) {
@@ -104,7 +139,8 @@ public class EmailPasswordActivity extends BaseActivity implements
 
                             if (user.isEmailVerified()) {
                                 spUsuarios.saveId(user.getUid());
-                                finish();
+                                //finish();
+                                goHome();
                             }
                         } else {
                             // If sign in fails, display a message to the user.
@@ -130,8 +166,9 @@ public class EmailPasswordActivity extends BaseActivity implements
     }
 
     private void signOut() {
+        spUsuarios.saveId("");FirebaseUser user = mAuth.getCurrentUser();
+        dbrSisaber.child("Usuario").child(user.getUid()).child("isConnected").setValue(false);
         mAuth.signOut();
-        spUsuarios.saveId("");
         updateUI(null);
     }
 
@@ -243,6 +280,9 @@ public class EmailPasswordActivity extends BaseActivity implements
                         Toast.LENGTH_LONG).show();
 
                 findViewById(R.id.signOutButton).setEnabled(false);
+            }
+            else {
+                goHome();
             }
         } else {
             mStatusTextView.setText(R.string.signed_out);

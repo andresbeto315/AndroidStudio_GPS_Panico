@@ -15,6 +15,7 @@ public class spUsuarios {
     final String FIRSTNAME = "firstname";
     final String LASTNAME = "lastname";
     final String EMAIL = "email";
+    final String ISCONNECTED = "isConnected";
 
     public spUsuarios(Context pContext) {
         mContext = pContext;
@@ -89,5 +90,18 @@ public class spUsuarios {
         s.setIsConnected(false);
 
         return s;
+    }
+
+    public boolean saveIsConnected(boolean isConnected) {
+        boolean bRetorno = true;
+        try {
+            SharedPreferences.Editor spEditor = getSP().edit();
+            spEditor.putBoolean(ISCONNECTED, isConnected);
+            spEditor.commit();
+        }
+        catch (Exception e) {
+            bRetorno = false;
+        }
+        return bRetorno;
     }
 }
