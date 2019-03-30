@@ -93,22 +93,6 @@ public class UsersLocationActivity extends FragmentActivity implements
     private void InitFirebase() {
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
-
-        DatabaseReference ref = databaseReference.child("Usuario");
-        //ref.addListenerForSingleValueEvent(
-        ref.addValueEventListener(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        collectUsers((Map<String, Object>) dataSnapshot.getValue());
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        //handle databaseError
-                    }
-                }
-        );
     }
 
     private void collectUsers(Map<String,Object> users) {
@@ -147,6 +131,22 @@ public class UsersLocationActivity extends FragmentActivity implements
         });
 
         enableMyLocation();
+
+        DatabaseReference ref = databaseReference.child("Usuario");
+        //ref.addListenerForSingleValueEvent(
+        ref.addValueEventListener(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        collectUsers((Map<String, Object>) dataSnapshot.getValue());
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        //handle databaseError
+                    }
+                }
+        );
     }
 
     @SuppressLint("MissingPermission")
@@ -160,22 +160,24 @@ public class UsersLocationActivity extends FragmentActivity implements
     }
 
     private void AddMarkerPositionUsers() {
-        mMap.clear();
-        for (Usuarios user : this.Users) {
-            if (user.getLocation() != null) {
-                if (!user.getIsConnected()) {
-                    mMap.addMarker(new MarkerOptions()
-                            .snippet(user.getId())
-                            .position(user.getLocation())
-                            .title(user.toString())
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-                } else {
-                    mMap.addMarker(new MarkerOptions()
-                            .snippet(user.getId())
-                            .position(user.getLocation())
-                            .title(user.toString()));
+        if (mMap != null) {
+            mMap.clear();
+            for (Usuarios user : this.Users) {
+                if (user.getLocation() != null) {
+                    if (!user.getIsConnected()) {
+                        mMap.addMarker(new MarkerOptions()
+                                .snippet(user.getId())
+                                .position(user.getLocation())
+                                .title(user.toString())
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                    } else {
+                        mMap.addMarker(new MarkerOptions()
+                                .snippet(user.getId())
+                                .position(user.getLocation())
+                                .title(user.toString()));
+                    }
+                    //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(user.getLocation(), 15));
                 }
-                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(user.getLocation(), 15));
             }
         }
     }
