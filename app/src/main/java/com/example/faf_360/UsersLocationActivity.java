@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -65,13 +66,35 @@ public class UsersLocationActivity extends FragmentActivity implements
         mapFragment.getMapAsync(this);
         mapFragment.onResume();
     }
+/*
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (App.GetApp(this).getUserLogin() != null)
+            databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(true);
+    }
+*/
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (App.GetApp(this).getUserLogin() != null)
+            databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (App.GetApp(this).getUserLogin() != null)
+            databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(true);
+    }
 
     private void InitFirebase() {
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference();
 
         DatabaseReference ref = databaseReference.child("Usuario");
-        ref.addListenerForSingleValueEvent(
+        //ref.addListenerForSingleValueEvent(
+        ref.addValueEventListener(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -87,6 +110,7 @@ public class UsersLocationActivity extends FragmentActivity implements
     }
 
     private void collectUsers(Map<String,Object> users) {
+        this.Users.clear();
         for (Map.Entry<String, Object> entry : users.entrySet()) {
             Map singleUser = (Map) entry.getValue();
             Usuarios user = Usuarios.toUser(singleUser);
@@ -134,6 +158,7 @@ public class UsersLocationActivity extends FragmentActivity implements
     }
 
     private void AddMarkerPositionUsers() {
+        mMap.clear();
         for (Usuarios user : this.Users) {
             if (user.getLocation() != null) {
                 if (!user.getIsConnected()) {
@@ -148,7 +173,7 @@ public class UsersLocationActivity extends FragmentActivity implements
                             .position(user.getLocation())
                             .title(user.toString()));
                 }
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(user.getLocation(), 15));
+                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(user.getLocation(), 15));
             }
         }
     }

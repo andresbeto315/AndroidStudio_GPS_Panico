@@ -70,6 +70,20 @@ public class UsersPlacesFavoriteActivity extends FragmentActivity implements OnM
         );
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (App.GetApp(this).getUserLogin() != null)
+            databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (App.GetApp(this).getUserLogin() != null)
+            databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(true);
+    }
+
     public void Volver(View view)
     {
         Intent intent = new Intent(UsersPlacesFavoriteActivity.this, UsersLocationActivity.class);
