@@ -3,11 +3,15 @@ package com.example.faf_360;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.faf_360.common.Permission;
@@ -56,6 +60,8 @@ public class UsersLocationActivity extends FragmentActivity implements
 
         this.Users = new ArrayList<Usuarios>();
 
+        InitPanico();
+
         FirebaseApp.initializeApp(this);
         InitFirebase();
         App.GetApp(this);
@@ -68,6 +74,25 @@ public class UsersLocationActivity extends FragmentActivity implements
         mapFragment.getMapAsync(this);
         mapFragment.onResume();
     }
+
+    private Vibrator vibrator;
+
+    public void InitPanico() {
+        Button button;
+        button = findViewById(R.id.btnPanico);
+        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (Build.VERSION.SDK_INT >= 26) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+                } else {
+                    vibrator.vibrate(200);
+                }
+            }
+        });
+    }
+
 /*
     @Override
     protected void onStart() {
