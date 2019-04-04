@@ -18,10 +18,12 @@ public class Usuarios {
     private LatLng Location;
     private List<LatLng> Favorites;
     private boolean IsConnected;
+    private boolean HelpMe;
 
     public Usuarios() {
         IsConnected = true;
         Favorites = new ArrayList<LatLng>();
+        HelpMe = false;
     }
 
     public String getId() {
@@ -80,6 +82,14 @@ public class Usuarios {
         IsConnected = isConnected;
     }
 
+    public boolean getHelpMe() {
+        return HelpMe;
+    }
+
+    public void setHelpMe(boolean helpMe) {
+        HelpMe = helpMe;
+    }
+
     @Override
     public String toString() {
         return Firstname + " " + Lastname;
@@ -92,6 +102,7 @@ public class Usuarios {
         result.put("lastname", Lastname);
         result.put("email", Email);
         result.put("password", Password);
+        result.put("helpMe", HelpMe);
 
         return result;
     }
@@ -107,6 +118,8 @@ public class Usuarios {
         Map location = (Map)userMap.get("location");
         if (location != null)
             user.setLocation(new LatLng((double)location.get("latitude"), (double)location.get("longitude")));
+        if (userMap.get("helpMe") != null)
+            user.setHelpMe((boolean)userMap.get("helpMe"));
         return user;
     }
 

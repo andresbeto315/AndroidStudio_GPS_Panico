@@ -1,7 +1,11 @@
 package com.example.faf_360;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.VibrationEffect;
@@ -10,7 +14,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -60,8 +67,6 @@ public class UsersLocationActivity extends FragmentActivity implements
 
         this.Users = new ArrayList<Usuarios>();
 
-        InitPanico();
-
         FirebaseApp.initializeApp(this);
         InitFirebase();
         App.GetApp(this);
@@ -73,34 +78,75 @@ public class UsersLocationActivity extends FragmentActivity implements
         mapFragment.onCreate(savedInstanceState);
         mapFragment.getMapAsync(this);
         mapFragment.onResume();
+
+        InitPanico();
     }
 
     private Vibrator vibrator;
 
+    private void setTextoPanico()
+    {
+        Button button;
+        button = findViewById(R.id.btnPanico);
+        if (App.GetApp(this).getUserLogin().getHelpMe())
+        {
+            button.setText(R.string.seguro);
+        }
+        else
+        {
+            button.setText(R.string.auxilio);
+        }
+    }
+
+    public static void setStatusBarColor(Activity activity, int statusBarColor) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = activity.getWindow();
+
+            if (statusBarColor == Color.BLACK && window.getNavigationBarColor() == Color.BLACK) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            } else {
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            }
+
+            window.setStatusBarColor(statusBarColor);
+        }
+    }
+
+    public void EntraronEnPanico()
+    {
+        if (Build.VERSION.SDK_INT >= 26) {
+            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            vibrator.vibrate(200);
+        }
+    }
+
     public void InitPanico() {
+        if (Permission.Vibrator(this)) {
+            Toast.makeText(this, "Permite la vibración", Toast.LENGTH_SHORT).show();
+        }
         Button button;
         button = findViewById(R.id.btnPanico);
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (Build.VERSION.SDK_INT >= 26) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE));
-                } else {
-                    vibrator.vibrate(200);
+                setTextoPanico();
+                if (App.GetApp(UsersLocationActivity.this).getUserLogin().getHelpMe())
+                {
+                    App.GetApp(UsersLocationActivity.this).getUserLogin().setHelpMe(false);
+                    databaseReference.child("Usuario").child(App.GetApp(UsersLocationActivity.this).getUserLogin().getId()).child("helpMe").setValue(false);
+                }
+                else
+                {
+                    App.GetApp(UsersLocationActivity.this).getUserLogin().setHelpMe(true);
+                    databaseReference.child("Usuario").child(App.GetApp(UsersLocationActivity.this).getUserLogin().getId()).child("helpMe").setValue(true);
                 }
             }
         });
     }
 
-/*
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (App.GetApp(this).getUserLogin() != null)
-            databaseReference.child("Usuario").child(App.GetApp(this).getUserLogin().getId()).child("isConnected").setValue(true);
-    }
-*/
     @Override
     protected void onPause() {
         super.onPause();
@@ -121,12 +167,24 @@ public class UsersLocationActivity extends FragmentActivity implements
     }
 
     private void collectUsers(Map<String,Object> users) {
+        boolean EnPanico = false;
         this.Users.clear();
         for (Map.Entry<String, Object> entry : users.entrySet()) {
             Map singleUser = (Map) entry.getValue();
             Usuarios user = Usuarios.toUser(singleUser);
+            if (user.getHelpMe()) {
+                Toast.makeText(this, user + " esta en peligro!! Activo su botón de pánico!!", Toast.LENGTH_SHORT).show();
+                EntraronEnPanico();
+                EnPanico = true;
+            }
             this.Users.add(user);
         }
+        int color = ContextCompat.getColor(this, R.color.colorPrimaryDark);
+        if (EnPanico) {
+            color = ContextCompat.getColor(this, R.color.colorPanico);
+        }
+        setStatusBarColor(this, color);
+        this.setTextoPanico();
         AddMarkerPositionUsers();
     }
 
