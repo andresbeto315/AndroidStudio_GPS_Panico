@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="left|top"
         android:id="@+id/btnSaveLocation"
-        android:text="Add favorite"
+        android:text="@string/add_favorite"
         android:padding="10dp"
         android:onClick="SavePosition"
         android:layout_marginTop="20dp"
@@ -25,6 +25,6 @@
         android:layout_gravity="left|bottom"
         android:layout_marginBottom="20dp"
         android:paddingRight="10dp"
-        android:text="Tap to vibrate" />
+        android:text="@string/auxilio" />
 
 </fragment>

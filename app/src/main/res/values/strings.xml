@@ -38,4 +38,7 @@
     <string name="validate_password_error">La contraseña es demasiado corta.</string>
     <string name="send_verification_email">Se envió un correo de verificación a: </string>
 
+    <string name="add_favorite">Add favorite</string>
+    <string name="auxilio">¡Auxilio!!</string>
+    <string name="seguro">Estoy a salvo</string>
 </resources>
