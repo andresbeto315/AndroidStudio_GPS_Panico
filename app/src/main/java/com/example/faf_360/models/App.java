@@ -23,38 +23,32 @@ public class App {
 
     private static App app;
 
-    private App()
-    {
+    private App() {
         // Usuario por defecto que esta autenticado
     }
+
+    private FirebaseDatabase fdbSisaber;
+    private DatabaseReference dbrSisaber;
 
     public static App GetApp(Activity activity) {
         if (app == null) {
             app = new App();
-            FirebaseDatabase fdbSisaber;
-            DatabaseReference dbrSisaber;
             FirebaseAuth mAuth;
 
             FirebaseApp.initializeApp(activity);
 
             //Initialize Firebase Db
-            fdbSisaber = FirebaseDatabase.getInstance();
-            dbrSisaber = fdbSisaber.getReference();
+            app.fdbSisaber = FirebaseDatabase.getInstance();
+            app.dbrSisaber = app.fdbSisaber.getReference();
 
             // Initialize Firebase Auth
             mAuth = FirebaseAuth.getInstance();
 
             // Obtiene el usuario actual
             FirebaseUser currentUser = mAuth.getCurrentUser();
-            app.getAppTohken();
 
             if (currentUser != null) {
-                DatabaseReference ref = dbrSisaber.child("Usuario").child(currentUser.getUid());
-
-                // Guarda el token de instalación de la App
-                if (app.tokenApp != "")
-                    ref.child("tokenApp").setValue(app.tokenApp);
-
+                DatabaseReference ref = app.dbrSisaber.child("Usuario").child(currentUser.getUid());
 
                 // Se crea el usuario autenticado
                 ref.addListenerForSingleValueEvent(
@@ -64,6 +58,7 @@ public class App {
                                 Map singleUser = (Map) dataSnapshot.getValue();
                                 Usuarios user = Usuarios.toUser(singleUser);
                                 app.setUserLogin(user);
+                                app.getAppTohken();
                             }
 
                             @Override
@@ -92,6 +87,11 @@ public class App {
 
                         // Get new Instance ID token
                         tokenApp = task.getResult().getToken();
+
+                        DatabaseReference ref = app.dbrSisaber.child("Usuario").child(app.userLogin.getId());
+                        // Guarda el token de instalación de la App
+                        if (app.tokenApp != "")
+                            ref.child("tokenApp").setValue(app.tokenApp);
                     }
                 });
     }
