@@ -1,7 +1,11 @@
 package com.example.faf_360.models;
 
 import android.app.Activity;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -10,6 +14,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.Map;
 
@@ -38,11 +44,19 @@ public class App {
             // Initialize Firebase Auth
             mAuth = FirebaseAuth.getInstance();
 
+            // Obtiene el usuario actual
             FirebaseUser currentUser = mAuth.getCurrentUser();
+            app.getAppTohken();
 
             if (currentUser != null) {
-                // Se crea el usuario autenticado
                 DatabaseReference ref = dbrSisaber.child("Usuario").child(currentUser.getUid());
+
+                // Guarda el token de instalación de la App
+                if (app.tokenApp != "")
+                    ref.child("tokenApp").setValue(app.tokenApp);
+
+
+                // Se crea el usuario autenticado
                 ref.addListenerForSingleValueEvent(
                         new ValueEventListener() {
                             @Override
@@ -64,6 +78,23 @@ public class App {
     }
 
     private Usuarios userLogin;
+    private String tokenApp;
+
+    private void getAppTohken() {
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("GetIDAplication", "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        tokenApp = task.getResult().getToken();
+                    }
+                });
+    }
 
     public Usuarios getUserLogin() {
         return userLogin;

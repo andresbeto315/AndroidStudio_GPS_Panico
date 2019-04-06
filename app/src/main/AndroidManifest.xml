@@ -17,7 +17,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
+        <service
+            android:name=".services.FirebaseMessagingServiceFF"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -32,12 +39,9 @@
 
         <activity
             android:name=".UsersLocationActivity"
-            android:label="@string/title_activity_users_location">
-        </activity>
-        <activity android:name=".MainActivity">
-        </activity>
-        <activity android:name=".UsersPlacesFavoriteActivity">
-        </activity>
+            android:label="@string/title_activity_users_location"></activity>
+        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".UsersPlacesFavoriteActivity"></activity>
         <activity android:name=".EmailPasswordActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,12 +49,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RegisterNameActivity">
-        </activity>
-        <activity android:name=".RegisterEmailActivity">
-        </activity>
-        <activity android:name=".RegisterPasswordActivity">
-        </activity>
+        <activity android:name=".RegisterNameActivity"></activity>
+        <activity android:name=".RegisterEmailActivity"></activity>
+        <activity android:name=".RegisterPasswordActivity"></activity>
     </application>
 
 </manifest>
